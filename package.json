@@ -1,0 +1,28 @@
+{
+    "name": "mwp-solver",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "node dist/main.js testset.json",
+        "train": "node dist/main.js trainset.json",
+        "valid": "node dist/main.js validset.json"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/happymeex/mwp-solver.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/happymeex/mwp-solver/issues"
+    },
+    "homepage": "https://github.com/happymeex/mwp-solver#readme",
+    "dependencies": {
+        "@types/node": "^20.9.4",
+        "openai": "^4.20.0",
+        "typescript": "^5.3.2"
+    }
+}
