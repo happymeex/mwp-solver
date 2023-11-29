@@ -5,7 +5,7 @@ of _math word problems_ (MWPs) found in
 the MAWPS dataset.
 Specifically, it separates a problem statement into a body (containing problem context)
 and a question statement.
-This is carried
+This is carried out using OpenAI's API.
 
 ## Usage
 
