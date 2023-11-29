@@ -9,4 +9,5 @@ export type MAWPSProblem = {
 export type SplitMAWPSProblem = MAWPSProblem & {
     context: string;
     question: string;
+    verified?: boolean;
 };

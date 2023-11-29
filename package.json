@@ -5,10 +5,13 @@
     "main": "index.js",
     "scripts": {
         "build": "tsc",
-        "test": "node dist/main.js testset.json",
-        "train": "node dist/main.js trainset.json",
-        "valid": "node dist/main.js validset.json",
-        "all": "node dist/main.js testset.json validset.json trainset.json"
+        "split:test": "node dist/main.js testset.json",
+        "split:train": "node dist/main.js trainset.json",
+        "split:valid": "node dist/main.js validset.json",
+        "train:findBadIds": "node dist/validation.js trainset_split.json",
+        "train:deleteIds": "node dist/delete.js trainset_split.json trainset_split_bad_ids.json",
+        "train:clean": "node dist/clean.js trainset_split.json",
+        "test": "node dist/test.js"
     },
     "repository": {
         "type": "git",

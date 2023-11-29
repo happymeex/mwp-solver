@@ -4,9 +4,9 @@ import { MAWPSProblem, SplitMAWPSProblem } from "./types";
 import { splitProblemsWithGPT } from "./gpt";
 
 /** Number of problems to ask GPT to split in a single request. */
-const BATCH_SIZE = 6;
+const BATCH_SIZE = 5;
 /** Number of concurrent batch requests to make at a time. */
-const REQUEST_BATCH_SIZE = 50;
+const REQUEST_BATCH_SIZE = 60;
 /** Milliseconds between requests. */
 const TIME_BETWEEN_REQUESTS = 60 * 1500;
 
@@ -80,6 +80,7 @@ function makeBatches(
         const existing: SplitMAWPSProblem[] = JSON.parse(
             fs.readFileSync(logPath, "utf8")
         );
+        console.log("number of existing ids: ", existing.length);
         const existingIds = existing.map((p) => p.id);
         problems_ = problems.filter((p) => !existingIds.includes(p.id));
     }

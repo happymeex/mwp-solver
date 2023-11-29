@@ -72,29 +72,35 @@ function splitResponseIntoParts(
 ): SplitMAWPSProblem[] {
     const ret: SplitMAWPSProblem[] = [];
     const lines = response.split("\n").filter((line) => line.trim() !== "");
-    if (lines.length % 2 !== 0) {
-        console.log("response had extra line:", lines[lines.length - 1]);
-        lines.pop();
-    }
+
     let problemIndex = 0;
-    for (let i = 0; i < lines.length; i += 2) {
-        let context = lines[i].split("SETUP:")[1];
-        let question = lines[i + 1].split("QUESTION:")[1];
-        if (
-            context === undefined ||
-            context.trim() === "" ||
-            question === undefined ||
-            question.trim() === ""
-        ) {
-            i++;
-            problemIndex++;
+    while (lines.length > 0) {
+        if (!lines[0].startsWith("SETUP:")) {
+            lines.splice(0, 1);
             continue;
         }
-        const problem = problems[problemIndex];
+        let setup = lines[0].split("SETUP:")[1].trim();
+        let index = 1;
+        while (index < lines.length && !lines[index].startsWith("QUESTION:")) {
+            setup += " " + lines[index].trim();
+            index++;
+        }
+        if (index === lines.length) {
+            break;
+        }
+        let question = lines[index].split("QUESTION:")[1].trim();
+        index++;
+        while (index < lines.length && !lines[index].startsWith("SETUP:")) {
+            question += " " + lines[index].trim();
+            index++;
+        }
+        // remove all lines up to but not including index
+        lines.splice(0, index);
+        // push problem
         ret.push({
-            ...problem,
-            context: context.trim(),
-            question: question.trim(),
+            ...problems[problemIndex],
+            context: setup,
+            question: question,
         });
         problemIndex++;
     }
@@ -102,4 +108,4 @@ function splitResponseIntoParts(
     return ret;
 }
 
-export { splitProblemsWithGPT };
+export { splitProblemsWithGPT, splitResponseIntoParts };
