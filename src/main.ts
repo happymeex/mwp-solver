@@ -53,7 +53,7 @@ function splitAll(filePath: string) {
                 fs.readFileSync(outPath, "utf8")
             );
             const newWrite = [...previous, ...concatenatedResults];
-            fs.writeFileSync(outPath, JSON.stringify(newWrite));
+            fs.writeFileSync(outPath, JSON.stringify(newWrite, null, 2));
         });
         if (batches.length > 0) {
             setTimeout(sendBatch, TIME_BETWEEN_REQUESTS);
