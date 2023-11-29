@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { MAWPSProblem, SplitProblem } from "./types";
+import { MAWPSProblem, SplitMAWPSProblem } from "./types";
 
 const openai = new OpenAI();
 
@@ -28,14 +28,12 @@ function assembleMessages(
             role: "user",
             content:
                 "Parse the following math problems and rewrite each into two components, " +
-                "a short paragraph explaining the context (world state) given in the problem " +
+                "a short paragraph explaining the setup (world state) given in the problem " +
                 "and a separate sentence explaining the question that the problem is asking. " +
                 "For each problem, respond with only these two components, " +
-                "labeling the first component with 'CONTEXT:' and the second component with 'QUESTION:'." +
+                "labeling the first component with 'SETUP:' and the second component with 'QUESTION:'." +
                 "It is okay if you do not use the exact wording provided in the problem, " +
-                "but please preserve all numerical values. " +
-                "The goal is for a human to be able to read the question statement " +
-                "and know what to look for in the context to solve the problem." +
+                "but please preserve all numerical values and mathematical correctness. " +
                 "First problem: " +
                 firstProblem,
         },
@@ -51,7 +49,7 @@ function assembleMessages(
  */
 async function splitProblemsWithGPT(
     problems: MAWPSProblem[]
-): Promise<SplitProblem[]> {
+): Promise<SplitMAWPSProblem[]> {
     const problemTexts: string[] = problems.map((p) => p.original_text);
     const messages = assembleMessages(problemTexts);
     const completion = await openai.chat.completions.create({
@@ -59,7 +57,7 @@ async function splitProblemsWithGPT(
         model: "gpt-3.5-turbo",
     });
     const response = completion.choices[0].message.content;
-    return splitResponseIntoParts(response);
+    return splitResponseIntoParts(response, problems);
 }
 
 /**
@@ -68,11 +66,19 @@ async function splitProblemsWithGPT(
  * @param response - The response string to split.
  * @return An array of SplitProblem objects representing each part of the response.
  */
-function splitResponseIntoParts(response: string): SplitProblem[] {
-    const ret: SplitProblem[] = [];
+function splitResponseIntoParts(
+    response: string,
+    problems: MAWPSProblem[]
+): SplitMAWPSProblem[] {
+    const ret: SplitMAWPSProblem[] = [];
     const lines = response.split("\n").filter((line) => line.trim() !== "");
+    if (lines.length % 2 !== 0) {
+        console.log("response had extra line:", lines[lines.length - 1]);
+        lines.pop();
+    }
+    let problemIndex = 0;
     for (let i = 0; i < lines.length; i += 2) {
-        let context = lines[i].split("CONTEXT:")[1];
+        let context = lines[i].split("SETUP:")[1];
         let question = lines[i + 1].split("QUESTION:")[1];
         if (
             context === undefined ||
@@ -81,15 +87,19 @@ function splitResponseIntoParts(response: string): SplitProblem[] {
             question.trim() === ""
         ) {
             i++;
+            problemIndex++;
             continue;
         }
+        const problem = problems[problemIndex];
         ret.push({
+            ...problem,
             context: context.trim(),
             question: question.trim(),
         });
+        problemIndex++;
     }
 
     return ret;
 }
 
-export { splitProblemsWithGPT as splitProblemWithGPT };
+export { splitProblemsWithGPT };

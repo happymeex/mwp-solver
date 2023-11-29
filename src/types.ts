@@ -6,7 +6,7 @@ export type MAWPSProblem = {
     ans: number;
 };
 
-export type SplitProblem = {
+export type SplitMAWPSProblem = MAWPSProblem & {
     context: string;
     question: string;
 };

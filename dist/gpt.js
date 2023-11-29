@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.splitProblemWithGPT = void 0;
+exports.splitProblemsWithGPT = void 0;
 const openai_1 = __importDefault(require("openai"));
 const openai = new openai_1.default();
 /**
@@ -26,54 +26,67 @@ function assembleMessages(problemTexts) {
         {
             role: "user",
             content: "Parse the following math problems and rewrite each into two components, " +
-                "a short paragraph explaining the context (world state) given in the problem " +
+                "a short paragraph explaining the setup (world state) given in the problem " +
                 "and a separate sentence explaining the question that the problem is asking. " +
                 "For each problem, respond with only these two components, " +
-                "labeling the first component with 'CONTEXT:' and the second component with 'QUESTION:'." +
-                "It is okay if you do not use the exact wording provided in the problem. " +
-                "The goal is for a human to be able to read the question statement " +
-                "and know what to look for in the context to solve the problem." +
+                "labeling the first component with 'SETUP:' and the second component with 'QUESTION:'." +
+                "It is okay if you do not use the exact wording provided in the problem, " +
+                "but please preserve all numerical values and mathematical correctness. " +
                 "First problem: " +
                 firstProblem,
         },
         ...messages,
     ];
 }
-async function splitProblemWithGPT(problems) {
+/**
+ * Splits a given array of MAWPS problems into an array of SplitProblems using GPT-3.5-turbo.
+ *
+ * @param problems - The array of MAWPS problems to be split.
+ * @return A promise that resolves to an array of SplitProblems.
+ */
+async function splitProblemsWithGPT(problems) {
     const problemTexts = problems.map((p) => p.original_text);
     const messages = assembleMessages(problemTexts);
     const completion = await openai.chat.completions.create({
         messages: messages,
         model: "gpt-3.5-turbo",
     });
-    // print all responses
     const response = completion.choices[0].message.content;
-    return splitResponseIntoParts(response);
+    return splitResponseIntoParts(response, problems);
 }
-exports.splitProblemWithGPT = splitProblemWithGPT;
+exports.splitProblemsWithGPT = splitProblemsWithGPT;
 /**
  * Splits a response string into an array of SplitProblem objects.
  *
  * @param response - The response string to split.
  * @return An array of SplitProblem objects representing each part of the response.
  */
-function splitResponseIntoParts(response) {
+function splitResponseIntoParts(response, problems) {
     const ret = [];
     const lines = response.split("\n").filter((line) => line.trim() !== "");
+    if (lines.length % 2 !== 0) {
+        console.log("response had extra line:", lines[lines.length - 1]);
+        lines.pop();
+    }
+    let problemIndex = 0;
     for (let i = 0; i < lines.length; i += 2) {
-        let context = lines[i].split("CONTEXT:")[1];
+        let context = lines[i].split("SETUP:")[1];
         let question = lines[i + 1].split("QUESTION:")[1];
         if (context === undefined ||
             context.trim() === "" ||
             question === undefined ||
             question.trim() === "") {
             i++;
+            problemIndex++;
             continue;
         }
+        const problem = problems[problemIndex];
         ret.push({
+            ...problem,
             context: context.trim(),
             question: question.trim(),
         });
+        problemIndex++;
     }
     return ret;
 }
