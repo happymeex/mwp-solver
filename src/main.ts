@@ -4,9 +4,9 @@ import { MAWPSProblem, SplitMAWPSProblem } from "./types";
 import { splitProblemsWithGPT } from "./gpt";
 
 /** Number of problems to ask GPT to split in a single request. */
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 1;
 /** Number of concurrent batch requests to make at a time. */
-const REQUEST_BATCH_SIZE = 60;
+const REQUEST_BATCH_SIZE = 120;
 /** Milliseconds between requests. */
 const TIME_BETWEEN_REQUESTS = 60 * 1500;
 
