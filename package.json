@@ -20,7 +20,8 @@
         "train:deleteIds": "node dist/delete.js trainset_split.json trainset_split_bad_ids.json",
         "train:clean": "node dist/clean.js trainset_split.json",
         "train:count": "node dist/count.js trainset_split.json",
-        "test": "node dist/test.js"
+        "test": "node dist/test.js",
+        "postprocess": "node dist/postprocess.js"
     },
     "repository": {
         "type": "git",
