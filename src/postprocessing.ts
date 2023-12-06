@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { SplitMAWPSProblem } from "./types";
 
-const TRAIN_PROPORTION = 0.7;
+const TRAIN_PROPORTION = 0.8;
 
 type SVAMPProblem = {
     ID: number;
